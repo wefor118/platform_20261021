@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>學習航線｜學生端課後學習平台</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f5f7ff;--sf:#fff;--ink:#26304d;--mute:#69738f;--line:#e2e6f3;--sea:#5b63d8;--on:#fff;--soft:#eef0ff;--sun:#ffbd59;--ok:#25815f;--okbg:#e5f7ee;--bad:#bb5147;--badbg:#fff0ed;--coral:#ff826d;--lav:#eae8ff;--mint:#e4f7f1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.7 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+button,select{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(2rem,6vw,3.2rem);line-height:1.2;font-weight:900}
+h2{font-size:1.5rem;font-weight:700;margin-bottom:.25rem}
+h3{font-size:1.05rem;font-weight:700}
+.mute{color:var(--mute);font-size:.92rem}
+.btn{border:2px solid var(--sea);background:var(--sea);color:var(--on);border-radius:12px;padding:.65rem 1.2rem;font-weight:700;min-height:44px}
+.btn.ghost{background:transparent;color:var(--sea)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--sf);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.25rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.note{background:var(--soft);border-radius:10px;padding:.5rem .9rem;font-size:.85rem;color:var(--mute)}
+.entry{max-width:1040px;margin:0 auto;padding:2.5rem 1.25rem 3rem}
+.entry .lede{max-width:34em;margin:1rem 0 1.5rem;font-size:1.1rem;color:var(--mute)}
+.cta{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:2rem}
+.route{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-top:.8rem}
+.stop{text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:.7rem .85rem;display:grid;gap:.1rem}
+button.stop:hover{border-color:var(--sea)}
+.stop b{font-size:.95rem}
+.stop small{color:var(--mute);font-size:.8rem}
+.stop.done{border-color:var(--sea)}
+.stop.now{border-color:var(--sun);background:var(--soft)}
+.st{font-size:.78rem;font-weight:700;color:var(--sea)}
+.stop.now .st{color:var(--ok)}
+.shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+nav{background:linear-gradient(180deg,#fff 0%,#f6f5ff 100%);border-right:1px solid var(--line);padding:1.25rem .9rem;display:flex;flex-direction:column;gap:.35rem;position:sticky;top:0;align-self:start;height:100vh}
+nav .brand{font-weight:900;font-size:1.2rem;margin-bottom:.8rem}
+nav button{text-align:left;background:none;border:0;border-radius:10px;padding:.6rem .8rem;min-height:44px;font-weight:500}
+nav button[aria-current="page"]{background:var(--soft);color:var(--sea);font-weight:700}
+nav .back{margin-top:auto;color:var(--mute);font-size:.9rem}
+.badge{display:inline-block;min-width:1.4em;text-align:center;border-radius:99px;background:var(--sun);color:#10303a;font-size:.75rem;font-weight:700;margin-left:.3rem}
+main{padding:1.5rem clamp(1rem,3vw,2.25rem) 3rem;max-width:1180px;width:100%}
+.top{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-bottom:1.25rem}
+select{background:var(--sf);border:2px solid var(--sea);border-radius:10px;padding:.4rem .7rem;font-weight:700;min-height:40px}
+.stack{display:grid;gap:1rem}
+.next{background:linear-gradient(120deg,#5b63d8 0%,#7979e8 55%,#9487ed 100%);color:var(--on);border:0;box-shadow:0 10px 25px #5b63d826}
+.next .btn{background:var(--on);color:var(--sea);border-color:var(--on);margin-top:.8rem}
+.bars{display:grid;gap:.55rem;margin-top:.7rem}
+.bar{display:grid;grid-template-columns:7.5em 1fr 2.5em;gap:.6rem;align-items:center;font-size:.92rem}
+.track{height:12px;background:var(--soft);border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--sea);border-radius:99px}
+.fill.low{background:var(--sun)}
+.big{font-size:2.6rem;font-weight:900;line-height:1.1}
+.cv{position:relative;height:230px;margin-top:.6rem}
+.welcome{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:linear-gradient(120deg,#fff 0%,#f3f2ff 100%);border:1px solid var(--line);border-radius:18px;padding:1rem 1.2rem;margin-bottom:1rem}
+.welcome .hello{font-size:1.15rem;font-weight:900}
+.welcome .avatar{width:48px;height:48px;border-radius:16px;background:#ffefcf;color:#745114;display:grid;place-items:center;font-size:1.45rem}
+.dash-title{display:flex;align-items:end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.card h3{margin-bottom:.25rem}
+.metric{font-size:1.65rem;font-weight:900;color:var(--sea);line-height:1.2}
+.home-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:1rem}
+.subject-pills{display:flex;gap:.5rem;flex-wrap:wrap}
+.pill{border-radius:999px;background:var(--lav);color:#4b51b6;padding:.32rem .75rem;font-weight:700;font-size:.85rem}
+.pill.orange{background:#fff0d9;color:#8c5c08}
+.pill.green{background:var(--mint);color:#256b56}
+.route .stop{min-height:95px}
+.entry-hero{background:radial-gradient(circle at 88% 18%,#fff1d6 0 8%,transparent 8.3%),linear-gradient(135deg,#eeefff 0%,#f7faff 58%,#e7f8f2 100%);border-radius:28px;padding:clamp(1.5rem,5vw,3.25rem);margin-bottom:1.25rem;position:relative;overflow:hidden}
+.entry-hero .cta{margin:1.5rem 0 1rem}.entry-hero .subject-pills{position:relative;z-index:1}.home-grid .cv{height:210px}
+.entry-hero:after{content:"✦";position:absolute;right:8%;bottom:7%;font-size:4rem;color:#ffc862;opacity:.65;transform:rotate(12deg)}
+.entry-hero h1{color:#30386e}
+.entry .card{box-shadow:0 8px 24px #3c4a8010}
+.stop{transition:transform .18s ease,box-shadow .18s ease}
+button.stop:hover{transform:translateY(-2px);box-shadow:0 6px 14px #454db51a}
+.card{box-shadow:0 4px 18px #3c4a8008}
+.tag{border-radius:999px;padding:.12rem .55rem;background:var(--soft)}
+.chain{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:.6rem}
+.node{padding:.35rem .9rem;border-radius:10px;border:2px solid var(--sea);font-weight:700;font-size:.92rem}
+.node.weak{border-color:var(--sun);background:var(--sun);color:#10303a}
+.tabs{display:flex;gap:.4rem;overflow-x:auto;border-bottom:1px solid var(--line);margin:1rem 0}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:.6rem .9rem;white-space:nowrap;color:var(--mute);min-height:44px}
+.tabs button[aria-selected="true"]{border-color:var(--sea);color:var(--sea);font-weight:700}
+.eg{background:var(--bg);border-radius:12px;padding:.8rem 1rem;margin-top:.8rem}
+.opts{display:grid;gap:.6rem;margin:1rem 0}
+.opt{text-align:left;background:var(--sf);border:2px solid var(--line);border-radius:12px;padding:.7rem 1rem;min-height:48px}
+.opt[aria-pressed="true"]{border-color:var(--sea);background:var(--soft);font-weight:700}
+.opt:disabled{cursor:default;opacity:.6}
+.fb{border-radius:12px;padding:.8rem 1rem;margin-top:1rem}
+.fb.ok{background:var(--okbg);color:var(--ok)}
+.fb.no{background:var(--badbg);color:var(--bad)}
+.fb p{color:var(--ink)}
+.hint{border-left:4px solid var(--sun);padding:.2rem .9rem;margin:.6rem 0}
+.acts{display:flex;gap:.6rem;flex-wrap:wrap}
+.prog{display:flex;gap:.4rem;margin-bottom:.8rem}
+.prog i{flex:1;height:6px;border-radius:9px;background:var(--line)}
+.prog i.d{background:var(--sea)}
+ul.clean{list-style:none;margin:.5rem 0 0;padding:0;display:grid;gap:.5rem}
+.m{display:flex;justify-content:space-between;gap:.5rem;padding:.5rem .8rem;background:var(--bg);border-radius:10px;font-size:.92rem}
+.tag{font-weight:700;white-space:nowrap}
+.tag.fix{color:var(--ok)}.tag.open{color:var(--bad)}
+.streak{display:flex;gap:.4rem;margin-top:.6rem}
+.streak i{width:28px;height:28px;border-radius:50%;background:var(--soft)}
+.streak i.d{background:var(--sun)}
+dialog{border:0;border-radius:16px;background:var(--sf);color:var(--ink);max-width:460px;width:calc(100% - 2rem);padding:1.4rem}
+dialog::backdrop{background:rgba(8,30,38,.55)}
+@media (max-width:720px){
+.shell{grid-template-columns:1fr}
+nav{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;flex-direction:row;justify-content:flex-start;overflow-x:auto;border-right:0;border-top:1px solid var(--line);padding:.3rem .3rem calc(.3rem + env(safe-area-inset-bottom,0px));z-index:5;gap:0}
+nav .brand,nav .back{display:none}
+nav button{text-align:center;padding:.4rem .55rem;font-size:.75rem;flex:0 0 auto}
+main{padding-bottom:6rem}
+.bar{grid-template-columns:6em 1fr 2.2em}
+.home-grid{grid-template-columns:1fr}.welcome{align-items:flex-start}.exam-entry{align-items:flex-start;flex-direction:column}.exam-layout,.report-grid{grid-template-columns:1fr}.report-kpis{grid-template-columns:repeat(2,1fr)}.entry{padding-top:1rem}.route{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:no-preference){.fill{transition:width .6s}}
+
+.map-intro{display:flex;justify-content:space-between;gap:1rem;align-items:start;flex-wrap:wrap;margin-bottom:1rem}.map-legend{display:flex;gap:.5rem;flex-wrap:wrap}.map-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(230px,.75fr);gap:1rem;align-items:start}.tree-scroll{overflow-x:auto;padding:.25rem 0 1rem}.tree{min-width:660px;display:grid;gap:.7rem}.tree-row{display:flex;justify-content:center;gap:.6rem;align-items:stretch;position:relative}.tree-node{position:relative;min-width:142px;max-width:190px;flex:1;background:#fff;border:2px solid var(--line);border-radius:15px;padding:.7rem .8rem;box-shadow:0 4px 14px #3c4a8008}.tree-node .node-label{font-size:.75rem;color:var(--mute);display:block}.tree-node b{display:block;line-height:1.35;margin:.15rem 0}.tree-node small{display:block;color:var(--mute);font-size:.75rem}.tree-node details{margin-top:.4rem;font-size:.8rem}.tree-node summary{cursor:pointer;color:var(--sea);font-weight:700}.tree-node ul{margin:.3rem 0 0;padding-left:1rem}.tree-node li{margin:.15rem 0}.tree-node li small{display:inline}.tree-node.past{background:#eef8f3;border-color:#a6d9c4}.tree-node.current{background:#f0efff;border:3px solid var(--sea);box-shadow:0 6px 20px #5b63d822}.tree-node.future{background:#fffaf0;border-color:#f1d79e}.tree-node button{border:0;background:none;text-align:left;padding:0;width:100%;font:inherit;color:inherit}.tree-arrow{color:#8993ad;font-size:1.3rem;align-self:center}.tree-down{text-align:center;color:#8993ad;height:14px;line-height:12px}.sem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}.semester{background:#fbfcff;border:1px solid var(--line);border-radius:14px;padding:.75rem}.semester h3{font-size:.92rem}.semester .tree-node{min-width:0;max-width:none;margin-top:.5rem;padding:.55rem}.map-sidebar{display:grid;gap:1rem}.map-sidebar .card{padding:1rem}.map-progress{display:grid;gap:.45rem;margin-top:.6rem}.map-progress div{display:flex;justify-content:space-between;gap:.5rem;padding:.45rem .6rem;background:var(--bg);border-radius:9px;font-size:.88rem}.map-note{font-size:.84rem;color:var(--mute);margin-top:.6rem}
+@media(max-width:720px){.map-layout{grid-template-columns:1fr}.sem-grid{grid-template-columns:1fr}.tree{min-width:600px}}
+.exam-card{border:2px solid #f0d38a;background:linear-gradient(120deg,#fffdf7,#fff8ea)}.exam-head{display:flex;align-items:start;justify-content:space-between;gap:.7rem;flex-wrap:wrap}.exam-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:.8rem 0}.exam-step{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.7rem}.exam-step b{display:block;color:var(--sea)}.exam-step small{display:block;color:var(--mute)}.exam-topics{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}.exam-topic{background:#fff;border:1px solid #f0d38a;border-radius:999px;padding:.25rem .65rem;font-size:.84rem}.exam-tip{background:#fff;border-radius:10px;padding:.65rem .8rem;margin-top:.7rem}.exam-disclaimer{font-size:.78rem;color:var(--mute);margin-top:.5rem}@media(max-width:720px){.exam-steps{grid-template-columns:1fr}}
+.learn-layout{display:grid;grid-template-columns:275px minmax(0,1fr);gap:1rem;align-items:start}.lesson-nav{position:sticky;top:1rem}.lesson-nav h3{margin-bottom:.5rem}.lesson-course{padding:.65rem .75rem;border-radius:10px;background:var(--soft);font-weight:700;margin:.45rem 0}.lesson-item{display:block;width:100%;text-align:left;border:0;border-radius:9px;background:transparent;padding:.55rem .65rem;margin:.2rem 0;font:inherit}.lesson-item:hover,.lesson-item[aria-current="step"]{background:#e8f7f1;color:#246d56}.lesson-item small{display:block;color:var(--mute);font-size:.76rem}.learn-main{display:grid;gap:1rem}.media-frame{min-height:300px;border-radius:18px;background:linear-gradient(135deg,#38b6dc,#e8f7ff 56%,#ffda57);display:grid;place-items:center;position:relative;overflow:hidden}.media-frame:before{content:"✦";position:absolute;right:6%;top:6%;font-size:3.5rem;color:white;opacity:.75}.media-screen{background:#ffffffdd;border:1px solid #fff;border-radius:14px;padding:1.2rem 1.5rem;text-align:center;max-width:70%;box-shadow:0 10px 30px #23304a18}.media-play{width:58px;height:58px;border-radius:50%;border:0;background:var(--sea);color:white;font-size:1.3rem;margin-top:.7rem}.media-meta{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem}.learn-materials{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.learn-section{padding:1rem 1.1rem}.learn-list{padding-left:1.2rem;margin:.5rem 0}.learn-list li{margin:.35rem 0}.learn-nav-foot{font-size:.82rem;color:var(--mute);margin-top:.7rem}.learn-goal{display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0}.learn-progress{height:8px;background:var(--soft);border-radius:99px;overflow:hidden;margin:.5rem 0}.learn-progress span{display:block;width:36%;height:100%;background:var(--sea)}
+@media(max-width:720px){.learn-layout{grid-template-columns:1fr}.lesson-nav{position:static}.media-frame{min-height:220px}.learn-materials{grid-template-columns:1fr}}
+.exam-entry{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:linear-gradient(110deg,#fffdf5,#fff)}.exam-type-row,.report-filters{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0}.exam-type,.filter{border:1px solid var(--line);background:#fff;border-radius:999px;padding:.4rem .8rem;font-weight:700}.exam-type.active,.filter.active,.exam-type[aria-pressed="true"]{background:var(--soft);border-color:var(--sea);color:var(--sea)}.exam-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,.7fr);gap:1rem;align-items:start}.report-head{display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}.report-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin:.8rem 0}.report-kpis .card,.report-kpis>div{display:grid;gap:.25rem}.report-kpis b{font-size:1.5rem;color:var(--sea)}.report-kpis small{color:var(--mute)}.report-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:1rem;margin-top:1rem}.report-table{border-collapse:collapse;width:100%;margin-top:1rem;font-size:.9rem}.report-table th,.report-table td{text-align:left;border-bottom:1px solid var(--line);padding:.55rem .4rem}.report-table th{color:var(--mute);font-weight:700}.report-table td:nth-child(2){font-weight:700}.exam-layout ol{padding-left:1.3rem}.exam-layout li{margin:.35rem 0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="dlg" aria-labelledby="dt"><h3 id="dt"></h3><p id="db" style="margin:.6rem 0 1rem"></p><div class="acts" id="da"></div></dialog>
+<script>
+(function(){
+var VIEWS=[["home","今天"],["course","學習地圖"],["learn","概念學習"],["practice","後測評量"],["errors","回顧再練"],["exam","考前複習"],["growth","我的成長"]];
+var SUBJ={math:"數學",english:"英語"};
+var ST=[["起點診斷","5 題","確認目前的學習起點","完成 5 題短診斷，了解目前熟悉的概念與需要支持的地方。診斷用來安排學習順序，不是排名。",""],
+["概念學習","依自己的步調","觀看影音、閱讀重點與例題","從學習地圖進入概念內容，觀看影音、閱讀摘要與例題。此階段不安排測驗。","learn"],
+["後測評量","學習後完成","檢視單元概念掌握情形","完成概念學習後再進行總結評量，檢視能否獨立運用概念。","practice"],
+["回顧與再練習","依間隔安排","延後回想與補強","依延後回顧結果安排複習間隔；答錯後先補強，再於稍後重測。","errors"]];
+var MAPNODES=[{"id": "E-MA-01-01-11-00-00", "name": "因數與公因數", "year": "115", "book": "09", "unit": "02", "code": "115KSEMA0902", "children": [{"name": "整除", "section": "01", "activity": "01", "code": "115KSEMA09020101"}, {"name": "因數", "section": "02", "activity": "02", "code": "115KSEMA09020202"}, {"name": "公因數和最大公因數", "section": "03", "activity": "03", "code": "115KSEMA09020303"}, {"name": "公因數和最大公因數(應用題)", "section": "03", "activity": "04", "code": "115KSEMA09020304"}]}, {"id": "E-MA-01-01-12-00-00", "name": "倍數與公倍數", "year": "115", "book": "09", "unit": "03", "code": "115KSEMA0903", "children": [{"name": "倍數", "section": "01", "activity": "01", "code": "115KSEMA09030101"}, {"name": "判別2、5、10的倍數", "section": "02", "activity": "02", "code": "115KSEMA09030202"}, {"name": "公倍數和最小公倍數", "section": "03", "activity": "03", "code": "115KSEMA09030303"}, {"name": "公倍數和最小公倍數(應用題)", "section": "03", "activity": "04", "code": "115KSEMA09030304"}]}, {"id": "E-MA-01-01-13-00-00", "name": "最大公因數與最小公倍數", "year": "115", "book": "11", "unit": "01", "code": "115KSEMA1101", "children": [{"name": "質數和合數", "section": "01", "activity": "01", "code": "115KSEMA11010101"}, {"name": "質因數和質因數分解", "section": "02", "activity": "02", "code": "115KSEMA11010202"}, {"name": "最大公因數", "section": "03", "activity": "03", "code": "115KSEMA11010303"}, {"name": "最大公因數(互質)", "section": "03", "activity": "04", "code": "115KSEMA11010304"}, {"name": "最大公因數(應用題)", "section": "03", "activity": "05", "code": "115KSEMA11010305"}, {"name": "最小公倍數", "section": "04", "activity": "06", "code": "115KSEMA11010406"}, {"name": "最小公倍數(互質)", "section": "04", "activity": "07", "code": "115KSEMA11010407"}, {"name": "最小公倍數(應用題)", "section": "04", "activity": "08", "code": "115KSEMA11010408"}]}];
+var CON=[
+["整除與因數","整數 A 除以整數 B（B 不為 0），商是整數且餘數為 0，就說 A 能被 B 整除，B 是 A 的因數。","12 = 1×12 = 2×6 = 3×4，所以 12 的因數是 1、2、3、4、6、12，共 6 個。"],
+["公因數與找法","幾個整數共同擁有的因數叫公因數，其中最大的叫最大公因數。","12 的因數：1、2、3、4、6、12；18 的因數：1、2、3、6、9、18。公因數是 1、2、3、6，最大公因數是 6。"],
+["短除法實戰","用共同的質因數連續去除，直到沒有共同質因數，再把左邊的除數相乘。","16、24 ÷2 → 8、12 ÷2 → 4、6 ÷2 → 2、3。左邊 2×2×2 = 8，最大公因數是 8。"],
+["生活應用題","題目出現「最多」「平分」「不剩」，通常是在找最大公因數。","24 支鉛筆和 36 本簿子要平分，每人一樣多。24 和 36 的最大公因數是 12，最多分給 12 人。"]];
+var Q=[
+{t:"12 的所有因數共有幾個？",tag:"因數",o:["4 個","6 個","8 個","10 個"],a:1,h:["先找出乘起來等於 12 的兩個數。","1×12、2×6、3×4，每組有兩個因數。"],e:"12 = 1×12 = 2×6 = 3×4，因數是 1、2、3、4、6、12，共 6 個。"},
+{t:"15 和 20 的公因數有哪些？",tag:"公因數",o:["1、5","1、3、5","1、5、10","1、2、5"],a:0,h:["先分別列出 15 和 20 的因數。","再圈出兩邊都有的數。"],e:"15 的因數：1、3、5、15；20 的因數：1、2、4、5、10、20。共同的是 1 和 5。"},
+{t:"用短除法求 16 和 24 的最大公因數，結果是多少？",tag:"短除法",o:["4","8","16","48"],a:1,h:["兩數同時除以共同的質數，一直除到沒有共同質因數。","把左邊除過的數乘起來。"],e:"16、24 ÷2 → 8、12 ÷2 → 4、6 ÷2 → 2、3，左邊 2×2×2 = 8。"},
+{t:"老師有 24 支鉛筆和 36 本練習簿，要平分給若干位學生，每人分到的一樣多，最多可以分給幾位學生？",tag:"應用題",o:["6 位","8 位","12 位","18 位"],a:2,h:["人數要能同時整除 24 和 36。","「最多」就是要找最大公因數。"],e:"24 和 36 的最大公因數是 12，最多可平分給 12 位學生。"},
+{t:"關於質數與因數，哪一個說法正確？",tag:"觀念",o:["所有偶數都是合數","1 是所有整數的因數","2 不是質數","最大公因數一定比兩數都小"],a:1,h:["逐一檢查，找出反例。","1 能整除每一個整數。"],e:"1 是任何整數的因數；2 是唯一的偶數質數；兩數相同時最大公因數等於它們自己。"}];
+var S={view:"",subj:"math",score:73,qi:0,pick:null,hints:0,done:false,tries:0,first:0,right:0,tab:0,mapChild:0,learnChild:0,videoPlaying:false,examKind:"段考",fb:null,wp:{},
+mistakes:[{id:101,t:"18 和 24 的最大公因數是多少？",tag:"最大公因數",o:["3","6","12","18"],a:1,w:"3",e:"18 的因數：1、2、3、6、9、18；24 的因數：1、2、3、4、6、8、12、24。公因數有 1、2、3、6，最大的是 6。"},
+{id:102,t:"下列何者「不是」30 的因數？",tag:"因數",o:["4","5","6","15"],a:0,w:"6",e:"30 ÷ 4 = 7 … 2，無法整除，所以 4 不是 30 的因數。"}]};
+var EN={title:"Daily routines",goal:"Today’s English route",nodes:[["Vocabulary","75%"],["Listening","62%"],["Sentence patterns","48%"],["Reading","—"]],resource:"Watch a short dialogue, review 6 routine verbs, then answer 5 listening and sentence questions.",activities:["Listen once without captions","Review words: wake up, get dressed, have breakfast","Replay the dialogue with captions","Complete 5 questions; retry missed items","Review again in two days"],recorded:"Audio plays, replay count, caption use, word cards opened, each answer, response time, hint use, retry result, and delayed review."};
+var EQ=[
+{t:"What does “get dressed” mean?",tag:"Vocabulary",o:["穿衣服","起床","吃早餐","做作業"],a:0,h:["Think about what you do after waking up.","It is an action you do before leaving home."],e:"“Get dressed” means to put on your clothes."},
+{t:"Listen to the dialogue. What time does Mia get up?",tag:"Listening",o:["At six","At seven","At eight","At nine"],a:1,h:["Listen for the time expression.","Replay the audio and focus on the first sentence."],e:"Mia says, “I get up at seven.”"},
+{t:"Choose the correct sentence.",tag:"Sentence patterns",o:["He brush his teeth.","He brushes his teeth.","He brushing his teeth.","He brush teeths."],a:1,h:["For he / she / it in the simple present, check the verb ending.","Brush changes to brushes."],e:"With he, she, or it, add -es to brush: “He brushes his teeth.”"},
+{t:"What does Mia do after breakfast?",tag:"Reading",o:["She goes to school.","She watches TV.","She goes to bed.","She plays basketball."],a:0,h:["Find the sentence beginning with “After breakfast”.","Look for the next action in the short text."],e:"The passage says Mia goes to school after breakfast."},
+{t:"Complete the sentence: I ___ my homework after school.",tag:"Vocabulary",o:["do","make","take","get"],a:0,h:["This verb often goes with homework.","The phrase is “do homework”."],e:"We say “do my homework.”"}];
+var EWORDS=["wake up","get dressed","have breakfast","brush my teeth","go to school","do homework"];
+var ELOG={answers:0,replays:0,captions:0,wordCards:0,hints:0,retries:0,responseMs:[]};
+var CH=[],studyStart=Date.now();
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+function open_(){return S.mistakes.filter(function(m){return!m.fixed})}
+function fixIt(m){m.fixed=true}
+function route(live){var active=ST.map(function(s){return s[4]}).indexOf(S.view);if(active<0)active=0;return '<div class="route" aria-label="學習路線">'+ST.map(function(s,i){var c=i<active?"done":i==active?"now":"";var inner='<span class="st">階段 '+(i+1)+'</span><b>'+s[0]+'</b><small>'+(live?s[1]:s[2])+'</small>';return live?'<button class="stop '+c+'" data-stage="'+i+'">'+inner+'</button>':'<div class="stop '+c+'">'+inner+'</div>'}).join("")+'</div>'}
+function bars(a){return '<div class="bars">'+a.map(function(r){return '<div class="bar"><span>'+r[0]+'</span><div class="track" role="img" aria-label="'+r[0]+' '+r[1]+'"><div class="fill'+(r[1]<60?" low":"")+'" style="width:'+r[1]+'%"></div></div><b>'+r[1]+'</b></div>'}).join("")+'</div>'}
+function nav(){var n=open_().length;return '<nav aria-label="主要導覽"><div class="brand">學習航線</div>'+VIEWS.map(function(v){return '<button data-go="'+v[0]+'"'+(S.view==v[0]?' aria-current="page"':'')+'>'+v[1]+(v[0]=="errors"&&n?'<span class="badge" aria-label="'+n+' 題待訂正">'+n+'</span>':'')+'</button>'}).join("")+'<button class="back" data-go="">回到入口</button></nav>'}
+function head(){return '<div class="top"><label class="mute" for="subj">今天想學</label><select id="subj">'+Object.keys(SUBJ).map(function(k){return '<option value="'+k+'"'+(S.subj==k?" selected":"")+'>'+SUBJ[k]+'</option>'}).join("")+'</select><span class="mute">嗨，王小明｜國小五年級</span></div>'}
+function book(){var m=S.mistakes;return '<div class="card"><h3>我的錯題本</h3>'+(m.length?'<ul class="clean">'+m.map(function(r){return '<li class="m"><span>'+esc(r.tag)+'：'+esc(r.t.slice(0,16))+'…</span><span class="tag '+(r.fixed?"fix":"open")+'">'+(r.fixed?"已訂正":"待訂正")+'</span></li>'}).join("")+'</ul>':'<p class="mute">目前沒有錯題。</p>')+'</div>'}
+var P={
+entry:function(){return '<div class="entry"><section class="entry-hero"><p class="mute">課後自學空間 · 國小高年級到國中</p><h1>先看見起點，<br>再走下一步。</h1><p class="lede">從一小段診斷開始，平台會幫你找到適合的學習內容。看懂、練習、訂正，再回來看看自己走了多遠。</p><div class="cta"><button class="btn" data-go="home">進入我的學習空間</button><button class="btn ghost" data-go="course">先逛學習地圖</button></div><div class="subject-pills"><span class="pill">數學</span><span class="pill green">英語</span><span class="pill orange">按自己的步調學</span></div></section><div class="card"><h3>我的學習路線</h3><p class="mute">每一步都有明確的小目標，錯了也可以看提示、再試一次。</p>'+route(false)+'</div><p class="note" style="margin-top:1rem">原型示範：此處學習數據與診斷結果皆為模擬內容。</p></div>'},
+home:function(){var isEn=S.subj=="english";return '<div class="welcome"><div><div class="hello">今天也來一小步吧！</div><p class="mute">完成一段專注學習，就能看見自己的進步。</p></div><div class="avatar" aria-hidden="true">✦</div></div><div class="stack"><div class="card next"><span class="pill orange">約 10 分鐘</span><h3 style="margin-top:.55rem">'+(isEn?EN.goal:"今天的數學學習")+'</h3><p>'+(isEn?EN.resource:"進入「因數與公因數」概念學習，觀看影音、閱讀重點並跟著例題理解。")+'</p><button class="btn" data-go="learn">開始今天的學習</button></div><div class="card exam-entry"><div><span class="pill orange">段考・期中・期末</span><h3 style="margin-top:.4rem">考前複習</h3><p class="mute">查看考試範圍，安排複習順序，追蹤待複習知識點。</p></div><button class="btn" data-go="exam">前往考前複習</button></div><div class="card"><div class="dash-title"><div><h3>我的學習路線</h3><p class="mute">診斷找起點，概念學習、後測與延後回顧逐步累積。</p></div><span class="pill green">第 2 站：概念學習</span></div>'+route(true)+'</div><div class="home-grid"><div class="card"><h3>近期學習表現</h3><p class="mute">'+(isEn?"英語表現依單字、聽力、句型與閱讀分開查看。":"近期練習表現示意；需搭配時間區間與題數解讀。")+'</p><div class="cv"><canvas id="c1" role="img" aria-label="近期學習表現變化圖"></canvas></div><div class="subject-pills"><span class="pill">本週 4 次</span><span class="pill orange">待回顧 1 項</span></div></div><div class="card"><h3>建議接續</h3>'+(isEn?bars(EN.nodes.slice(0,3).map(function(x){return[x[0],parseInt(x[1],10)]})):bars([["整除與因數",85],["公因數與找法",70],["短除法實戰",60],["生活應用題",48]]))+'<div class="eg"><b>下一步</b><p>'+(isEn?"重聽一次對話，再進入後測評量。":"先回顧「生活應用題」的例題，再完成後測評量。")+'</p></div></div></div><div class="grid"><div class="card"><h3>學習時間</h3><p class="mute">時間用來回顧安排，不代表學會多少。</p><div class="cv"><canvas id="c2" role="img" aria-label="本週學習時間圖"></canvas></div></div><div class="card"><h3>首次作答與訂正後</h3><p class="mute">看看提示與補強後，哪些地方更熟悉。</p><div class="cv"><canvas id="c3" role="img" aria-label="首次及訂正後答題表現圖"></canvas></div></div></div></div>'},
+exam:function(){var isEn=S.subj=="english";return '<div class="map-intro"><div><h2>考前複習</h2><p class="mute">目前選擇：'+S.examKind+'｜確認範圍後安排複習。</p></div><span class="pill orange">考試日期與範圍需自行確認</span></div><div class="exam-type-row"><button class="exam-type" data-exam-kind="段考" aria-pressed="'+(S.examKind=="段考")+'">段考複習</button><button class="exam-type" data-exam-kind="期中考" aria-pressed="'+(S.examKind=="期中考")+'">期中考複習</button><button class="exam-type" data-exam-kind="期末考" aria-pressed="'+(S.examKind=="期末考")+'">期末考複習</button></div><div class="exam-layout"><div class="card exam-card"><div class="exam-head"><div><span class="pill orange">'+(isEn?"英語":"數學")+' · 考前計畫</span><h3 style="margin-top:.45rem">把本學期學過的內容，分段複習一次</h3><p class="mute">先看範圍，再依學習紀錄找出需要加強的內容。</p></div><span class="pill">建議：每日 15–20 分鐘</span></div><div class="exam-steps"><div class="exam-step"><b>① 確認範圍</b><small>依學校公告勾選課程單元</small></div><div class="exam-step"><b>② 找待複習點</b><small>參照診斷、後測與錯題紀錄</small></div><div class="exam-step"><b>③ 分段複習</b><small>回看概念材料，完成後再做範圍評量</small></div></div><h3>複習範圍示意</h3><div class="exam-topics">'+(isEn?'<span class="exam-topic">單字與片語</span><span class="exam-topic">日常對話聽力</span><span class="exam-topic">句型與閱讀</span>':'<span class="exam-topic">因數與公因數</span><span class="exam-topic">倍數與公倍數</span><span class="exam-topic">最大公因數與最小公倍數</span>')+'</div><p class="exam-disclaimer">目前未連結校曆或個人化考試範圍；此處內容為介面示意，正式使用時由學生或家長依學校公告設定。</p></div><aside class="stack"><div class="card"><h3>今天可以這樣複習</h3><ol><li>先做範圍診斷</li><li>回看答錯或需提示的概念</li><li>隔天再做不同題目確認</li></ol><button class="btn" style="margin-top:.7rem" data-go="practice">開始考前範圍診斷</button></div><div class="card"><h3>目前複習狀態</h3><div class="report-kpis"><div><b>3</b><small>範圍單元</small></div><div><b>1</b><small>待回顧項目</small></div></div><button class="btn ghost" style="margin-top:.7rem" data-go="course">查看學習地圖</button></div></aside></div>'},
+learn:function(){if(S.subj=="english")return '<div class="map-intro"><div><h2>英語概念學習</h2><p class="mute">影音、字幕與單字卡，依自己的步調學習。</p></div></div><div class="card"><span class="pill green">Daily routines · 聽力與句型</span><div class="media-frame" style="margin-top:.8rem"><div class="media-screen"><span class="pill orange">影音教材示意</span><h3 style="margin-top:.5rem">日常作息對話</h3><p class="mute">影片長度 3 分 40 秒 · 可搭配字幕與單字卡</p><button class="media-play" data-act="play-video">'+(S.videoPlaying?'Ⅱ':'▶')+'</button></div></div><h3 style="margin-top:1rem">學習重點</h3><p>先聽懂對話大意，再留意日常作息詞彙與 he / she 動詞變化。</p><div class="eg"><b>單字卡</b><p>'+EWORDS.join(' · ')+'</p></div><details style="margin-top:.7rem"><summary>查看學習例句</summary><p>He gets dressed at seven. She has breakfast before school.</p></details><p class="map-note">此學習區提供影音、字幕、單字卡與例句，不安排測驗；診斷與學習後評量另行進行。</p><div style="margin-top:1rem"><button class="btn" data-go="practice">完成學習，前往後測</button></div></div>';var parent=MAPNODES[0],child=parent.children[S.learnChild]||parent.children[0];var lessonList=parent.children.map(function(c,i){return '<button class="lesson-item" data-learn-child="'+i+'" aria-current="'+(i==S.learnChild?'step':'false')+'">'+(i+1)+'．'+c.name+'<small>概念內容</small></button>'}).join('');return '<div class="map-intro"><div><h2>概念學習</h2><p class="mute">先看懂概念，再依自己的步調閱讀與練習例題。</p></div><span class="pill green">第 '+parent.book+' 冊 · 單元 '+parent.unit+' · '+parent.name+'</span></div><div class="learn-layout"><aside class="card lesson-nav"><h3>本單元學習內容</h3><div class="lesson-course">'+parent.name+'</div>'+lessonList+'<p class="learn-nav-foot">學習順序可依診斷結果調整。此處不放測驗；起點診斷與學習後的後測評量分開進行。</p></aside><section class="learn-main"><div class="card"><div class="dash-title"><div><span class="pill">目前知識點</span><h3 style="margin-top:.45rem">'+child.name+'</h3></div><span class="mute">影音與重點教材</span></div><div class="media-frame"><div class="media-screen"><span class="pill orange">影音教材示意</span><h3 style="margin-top:.5rem">'+child.name+'｜概念說明</h3><p class="mute">影片長度 4 分 20 秒 · 建議看完後閱讀重點與例題</p><button class="media-play" aria-label="播放示意影片" data-act="play-video">'+(S.videoPlaying?'Ⅱ':'▶')+'</button></div></div><div class="media-meta"><span class="pill green">'+(S.videoPlaying?'播放中':'尚未播放')+'</span><span class="pill">字幕：可開啟</span><span class="pill orange">觀看進度：示意 0:00 / 4:20</span></div><div class="learn-progress" aria-label="影音觀看進度示意"><span></span></div></div><div class="learn-materials"><div class="card learn-section"><h3>本節學習重點</h3><div class="learn-goal"><span class="pill">認識概念</span><span class="pill green">理解表示方式</span></div><p>用自己的話說明「'+child.name+'」的意思，並能指出它和本單元其他概念的關係。</p><ul class="learn-list"><li>先觀看短影音，抓住核心概念。</li><li>閱讀重點摘要，對照課本或講義。</li><li>看完例題後，試著說明每一步的想法。</li></ul></div><div class="card learn-section"><h3>例題與學習材料</h3><p class="mute">教材可依知識點提供影片、圖解、課本頁面與範例。</p><div class="eg"><b>例題示意</b><p>把概念放進一個簡單情境中，先看解題步驟，再試著自己說明為什麼這樣做。</p></div><details style="margin-top:.65rem"><summary>查看完整例題說明</summary><p>先找出題目中的已知條件，再選擇適合的概念表示；完成後，用自己的話說明每一步的理由。</p></details><p class="learn-nav-foot">學習行為紀錄：影音播放／暫停、觀看進度、字幕使用、教材開啟與停留時間。</p></div></div><div class="card"><div class="dash-title"><div><h3>完成概念學習</h3><p class="mute">確認已看過影音與學習材料，再前往獨立的後測評量。</p></div><button class="btn" data-go="practice">完成學習，前往後測</button></div></div></section></div>'},
+course:function(){if(S.subj=="english")return '<h2>英語學習地圖</h2><p class="mute">每天練一點：單字、聽力、句型和閱讀。</p><div class="grid" style="margin-top:1rem">'+EN.nodes.map(function(x,i){return '<div class="card"><span class="pill '+(i%2?'green':'')+'">學習站 '+(i+1)+'</span><h3 style="margin-top:.6rem">'+x[0]+'</h3><p class="mute">目前練習表現：'+x[1]+'</p><div class="eg">'+(i==0?EWORDS.join(" · "): ["聽懂日常作息對話","分辨 he / she 的動詞變化","讀懂簡短生活情境"][Math.max(0,i-1)])+'</div><button class="btn ghost" style="margin-top:.7rem" data-go="practice">前往練習</button></div>'}).join('')+'</div><div class="card" style="margin-top:1rem"><h3>今日學習建議</h3><p>'+EN.resource+'</p></div>';var focus=MAPNODES,cur=focus[0],next=focus[1],later=focus[2];function nodeCard(n,label,state){if(!n)return '';var kids=n.children.map(function(k){return '<li>'+k.name+'</li>'}).join('');return '<div class="tree-node '+state+'"><span class="node-label">'+label+'｜第 '+parseInt(n.book,10)+' 冊 · 第 '+parseInt(n.unit,10)+' 單元</span><b>'+n.name+'</b>'+ (kids?'<details><summary>查看知識點（'+n.children.length+'）</summary><ul>'+kids+'</ul></details>':'')+'</div>'}return '<div class="map-intro"><div><h2>數學學習地圖</h2><p class="mute">查看知識點之間的前後關係，掌握上一個、目前與本學期接續的學習內容。</p></div><div class="map-legend"><span class="pill green">上一個學習</span><span class="pill">目前學習</span><span class="pill orange">本學期接續</span></div></div><div class="map-layout"><div class="card"><div class="dash-title"><div><h3>知識點學習路徑</h3><p class="mute">國小數學學習內容</p></div><span class="pill">學年 115 · 康軒</span></div><div class="tree-scroll"><div class="tree" aria-label="數學知識點前後關係"><div class="tree-row">'+nodeCard(cur,'目前學習','current')+'<span class="tree-arrow">→</span>'+nodeCard(next,'本學期接續','future')+'<span class="tree-arrow">→</span>'+nodeCard(later,'本學期接續','future')+'</div></div><div class="tree-down">↓</div><div class="sem-grid"><div class="semester"><h3>上一個學習</h3><div class="tree-node past"><span class="node-label">前置概念</span><b>整數乘法與除法</b><small>前置概念關係待確認</small></div></div><div class="semester"><h3>目前學習</h3>'+nodeCard(cur,'本學期進度','current')+'</div><div class="semester"><h3>本學期接續</h3>'+nodeCard(next,'後續課次','future')+nodeCard(later,'後續單元','future')+'</div></div></div><div class="map-note">學習順序依課程架構安排；前置概念關係仍待確認。節點顏色代表學習進度，不代表能力等級。</div><div class="tabs" role="tablist" aria-label="目前單元知識點">'+cur.children.map(function(x,i){return '<button role="tab" data-map-child="'+i+'" aria-selected="'+(S.mapChild==i)+'">'+x.name+'</button>'}).join('')+'</div><div role="tabpanel"><h3>'+(cur.children[S.mapChild]||cur.children[0]||{}).name+'</h3><p class="mute">本單元的核心概念與延伸知識點。</p><button class="btn" style="margin-top:.8rem" data-go="learn">開始概念學習</button></div></div><aside class="map-sidebar"><div class="card"><h3>我的學習狀態</h3><p class="mute">目前單元的示範進度</p><div class="map-progress"><div><span>上一個學習</span><b>可回顧</b></div><div><span>目前學習</span><b>進行中</b></div><div><span>本學期接續</span><b>尚未開始</b></div></div></div><div class="card"><h3>今日建議</h3><p class="mute">完成目前知識點後，再依練習結果決定是否回顧前置概念或繼續下一課。</p><button class="btn ghost" style="margin-top:.6rem" data-go="learn">開始概念學習</button></div></aside></div>'},
+practice:function(){var pool=S.subj=="english"?EQ:Q,q=pool[S.qi]||pool[pool.length-1];
+if(S.done)return '<h2>後測評量完成</h2><div class="stack" style="margin-top:1rem"><div class="card"><p class="big">'+S.right+' / '+pool.length+'</p><p class="mute">答對題數，其中第一次就答對 '+S.first+' 題。一次練習是學習線索，不代表整體精熟程度。</p></div>'+book()+'<div class="acts"><button class="btn" data-go="errors">去訂正錯題</button><button class="btn ghost" data-act="again">再練一次</button></div></div>';
+var h=(S.subj=="english"?'<div class="card" style="margin-bottom:1rem"><span class="pill green">聽一聽 · Daily routines</span><p style="margin:.6rem 0">模擬對話：<b>“I get up at seven. Then I get dressed and have breakfast.”</b></p><div class="acts"><button class="btn ghost" data-act="replay">'+(ELOG.replays?'再聽一次（'+ELOG.replays+'）':'播放對話')+'</button><button class="btn ghost" data-act="captions">'+(ELOG.captions?'隱藏字幕':'顯示字幕')+'</button><button class="btn ghost" data-act="words">單字卡'+(ELOG.wordCards?'（已看 '+ELOG.wordCards+' 次）':'')+'</button></div>'+(ELOG.captions?'<p class="eg">字幕：I get up at seven. Then I get dressed and have breakfast.</p>':'')+(ELOG.wordCards?'<p class="eg">'+EWORDS.join(' · ')+'</p>':'')+'</div>':'')+'<div class="prog" aria-label="第 '+(S.qi+1)+' 題，共 '+pool.length+' 題">'+pool.map(function(_,i){return '<i class="'+(i<S.qi||(i==S.qi&&S.fb=="ok")?"d":"")+'"></i>'}).join("")+'</div><p class="mute">第 '+(S.qi+1)+' / '+pool.length+' 題｜'+q.tag+'</p><h2 style="margin-top:.3rem">'+esc(q.t)+'</h2><div class="opts" role="group" aria-label="選項">'+q.o.map(function(o,i){return '<button class="opt" data-pick="'+i+'" aria-pressed="'+(S.pick===i)+'"'+(S.fb=="ok"?" disabled":"")+'>'+"ABCD"[i]+"．"+esc(o)+'</button>'}).join("")+'</div>';
+for(var i=0;i<S.hints;i++)h+='<p class="hint">提示 '+(i+1)+'：'+q.h[i]+'</p>';
+h+='<div class="acts">';
+if(S.fb!="ok")h+='<button class="btn ghost" data-act="hint"'+(S.hints>=q.h.length?" disabled":"")+'>需要提示</button><button class="btn" data-act="check"'+(S.pick===null||S.fb=="no"?" disabled":"")+'>確認答案</button>';
+if(S.fb=="no")h+='<button class="btn" data-act="retry">再試一次</button>';
+if(S.fb=="ok")h+='<button class="btn" data-act="next">'+(S.qi<pool.length-1?"下一題":"看結果")+'</button>';
+h+='</div><div aria-live="polite">';
+if(S.fb=="ok")h+='<div class="fb ok"><b>答對了！</b><p>'+q.e+'</p></div>';
+if(S.fb=="no")h+='<div class="fb no"><b>還差一點。</b><p>這題已加入錯題本。看看提示，再試一次。</p></div>';
+return '<div class="grid"><div class="card"><h2>單元後測評量</h2><p class="mute">完成概念學習後，檢視能否獨立運用本單元知識。</p>'+h+'</div></div></div><div style="margin-top:1rem">'+book()+'</div>'},
+errors:function(){var o=open_(),f=S.mistakes.filter(function(m){return m.fixed});
+return '<h2>回顧與再練習</h2><p class="mute">在學習後隔一段時間，再試著回想概念。若答錯，先補強並安排稍後重測；延後表現用來觀察知識保持情形。</p><div class="card"><h3>建議回顧節奏（示意）</h3><div class="exam-steps"><div class="exam-step"><b>隔天</b><small>短回顧：少量題目</small></div><div class="exam-step"><b>一週後</b><small>延後提取：換題練習</small></div><div class="exam-step"><b>依表現調整</b><small>穩定則拉長間隔；需提示則先補強</small></div></div><p class="exam-disclaimer">此節奏是待驗證的起始設定，需依知識點、學習年齡與實際作答資料調整。</p></div><div class="stack" style="margin-top:1rem">'+(o.length?o.map(function(m){var w=S.wp[m.id]||[];return '<div class="card"><p class="mute">'+m.tag+'｜上次選：'+esc(m.w)+'</p><h3 style="margin:.3rem 0">'+esc(m.t)+'</h3><div class="opts" role="group" aria-label="重新作答">'+m.o.map(function(x,i){return '<button class="opt" data-fix="'+m.id+'" data-i="'+i+'"'+(w.indexOf(i)>-1?" disabled":"")+'>'+"ABCD"[i]+"．"+esc(x)+'</button>'}).join("")+'</div>'+(w.length?'<div class="fb no" role="status"><b>再想想看。</b><p>觀念解析：'+m.e+'</p></div>':'')+'</div>'}).join(""):'<div class="card"><p>目前沒有待訂正的錯題，太棒了！</p></div>')+(f.length?'<div class="card"><h3>已訂正</h3><ul class="clean">'+f.map(function(m){return '<li class="m"><span>'+esc(m.t)+'</span><span class="tag fix">已訂正</span></li>'}).join("")+'</ul></div>':"")+'</div>'},
+growth:function(){var isEn=S.subj=="english";var topics=isEn?[["Vocabulary",75,"持續練習"],["Listening",62,"建議回聽"],["Sentence patterns",48,"優先補強"],["Reading",68,"穩定累積"]]:[["因數與公因數",85,"大致穩定"],["倍數與公倍數",70,"可再複習"],["最大公因數與最小公倍數",60,"持續練習"],["生活應用題",48,"優先補強"]];return '<div class="report-head"><div><span class="pill green">個人學習報表</span><h2 style="margin-top:.4rem">我的成長</h2><p class="mute">回顧最近的學習投入、知識點表現與下一步。</p></div><div class="report-filters"><button class="filter active">近 7 天</button><button class="filter">近 30 天</button><button class="filter">本學期</button></div></div><div class="report-kpis"><div class="card"><small>學習次數</small><b>4 次</b><span class="mute">近 7 天</span></div><div class="card"><small>學習時間</small><b>80 分鐘</b><span class="mute">分散於 4 天</span></div><div class="card"><small>完成知識點</small><b>2 個</b><span class="mute">本週新增 1 個</span></div><div class="card"><small>待回顧</small><b>1 項</b><span class="mute">建議安排短回顧</span></div></div><div class="report-grid"><div class="card"><div class="dash-title"><div><h3>知識點掌握概況</h3><p class="mute">依近期診斷、後測與練習資料整理</p></div><span class="pill">'+(isEn?"英語":"數學")+'</span></div>'+bars(topics.map(function(x){return[x[0],x[1]]}))+'<table class="report-table"><thead><tr><th>知識點</th><th>近期表現</th><th>建議</th></tr></thead><tbody>'+topics.map(function(x){return '<tr><td>'+x[0]+'</td><td>'+x[1]+'%</td><td>'+x[2]+'</td></tr>'}).join('')+'</tbody></table></div><div class="card"><h3>近期學習表現</h3><p class="mute">呈現練習表現的變化；不等同正式成績。</p><div class="cv"><canvas id="c1" role="img" aria-label="近期學習表現變化圖"></canvas></div><h3 style="margin-top:1rem">學習節奏</h3><div class="cv"><canvas id="c2" role="img" aria-label="本週學習時間圖"></canvas></div></div></div><div class="report-grid"><div class="card"><h3>近期學習紀錄</h3><ul class="clean"><li class="m"><span>週一 · 完成概念學習</span><span class="tag fix">因數</span></li><li class="m"><span>週三 · 完成後測評量</span><span class="tag fix">8 / 10 題</span></li><li class="m"><span>週五 · 訂正並查看解析</span><span class="tag open">應用題</span></li><li class="m"><span>週日 · 延後回顧</span><span class="tag open">待完成</span></li></ul></div><div class="card"><h3>下一步建議</h3><p class="eg">先回看「'+topics[3][0]+'」的概念例題，隔天用不同題目再試一次。</p><div class="acts" style="margin-top:.7rem"><button class="btn" data-go="learn">繼續概念學習</button><button class="btn ghost" data-go="errors">查看待回顧</button></div></div></div><p class="note" style="margin-top:1rem">示範報表：目前數值為原型資料。正式報表應標示統計期間、資料來源與題數；作答表現是學習線索，不直接等同能力或努力程度。</p>'},
+};
+function draw(){CH.forEach(function(c){c.destroy()});CH=[];if(!window.Chart||!(S.view==="home"||S.view==="growth"))return;var cs=getComputedStyle(document.documentElement),g=function(n){return cs.getPropertyValue(n).trim()};Chart.defaults.color=g("--mute");Chart.defaults.borderColor=g("--line");Chart.defaults.font.family='"Noto Sans TC",sans-serif';var o={responsive:true,maintainAspectRatio:false};var curveData=S.subj==="english"?[48,53,56,60,59,64,66]:[52,58,62,65,70,72,S.score];if($("#c1"))CH.push(new Chart($("#c1"),{type:"line",data:{labels:["10/15","10/16","10/17","10/18","10/19","10/20","10/21"],datasets:[{label:"學習表現（示意）",data:curveData,borderColor:g("--sea"),backgroundColor:g("--soft"),fill:true,tension:.3,pointRadius:4,pointHoverRadius:6}]},options:Object.assign({scales:{y:{min:30,max:100}},plugins:{legend:{display:false}}},o)}));if($("#c2"))CH.push(new Chart($("#c2"),{type:"bar",data:{labels:["一","二","三","四","五","六","日"],datasets:[{label:"影音與教材",data:[15,20,25,10,15,30,20],backgroundColor:g("--sea")},{label:"練習與回顧",data:[10,15,10,5,10,20,10],backgroundColor:g("--sun")}]},options:Object.assign({scales:{x:{stacked:true},y:{stacked:true}}},o)}));if($("#c3"))CH.push(new Chart($("#c3"),{type:"bar",data:{labels:["因數","公因數","短除法","應用題"],datasets:[{label:"首次答對",data:[80,65,50,40],backgroundColor:g("--mute")},{label:"訂正後",data:[100,90,85,75],backgroundColor:g("--sea")}]},options:Object.assign({scales:{y:{max:100}},plugins:{legend:{position:"bottom"}}},o)}))}
+function render(){var v=S.view,app=$("#app");
+if(!v){app.innerHTML=P.entry();return}
+var body=P[v]();
+app.innerHTML='<div class="shell">'+nav()+'<main>'+head()+body+'<p class="note" style="margin-top:1.5rem">示範資料，不代表真實學生的能力或學習成效。</p></main></div>';draw()}
+function go(v){S.view=v;try{history.replaceState(null,"",v?"#"+v:location.pathname)}catch(e){}window.scrollTo(0,0);render()}
+function stage(i){var s=ST[i];$("#dt").textContent="階段 "+(i+1)+"：" +s[0];$("#db").textContent=s[3];$("#da").innerHTML=(s[4]?'<button class="btn" data-go="'+s[4]+'" data-close="1">前往</button>':'')+'<button class="btn ghost" data-close="1">關閉</button>';$("#dlg").showModal()}
+document.addEventListener("change",function(e){if(e.target.id=="subj"){S.subj=e.target.value;render();var s=$("#subj");if(s)s.focus()}});
+document.addEventListener("click",function(e){
+var b=e.target.closest("[data-go],[data-pick],[data-act],[data-tab],[data-map-child],[data-exam-kind],[data-stage],[data-fix],[data-close]");if(!b)return;var pool=S.subj=="english"?EQ:Q,q=pool[S.qi]||pool[pool.length-1];
+if(b.dataset.close!==undefined)$("#dlg").close();
+if(b.dataset.stage!==undefined)return stage(+b.dataset.stage);
+if(b.dataset.go!==undefined){if(b.dataset.go==="practice"||b.dataset.go==="home"){studyStart=Date.now();S.qi=0;S.pick=null;S.fb=null;S.hints=0;S.tries=0;S.done=false;S.first=0;S.right=0}return go(b.dataset.go)}
+if(b.dataset.tab!==undefined)S.tab=+b.dataset.tab;
+if(b.dataset.mapChild!==undefined){S.mapChild=+b.dataset.mapChild;render();return}
+if(b.dataset.examKind!==undefined){S.examKind=b.dataset.examKind;render();return}
+if(b.dataset.learnChild!==undefined){S.learnChild=+b.dataset.learnChild;S.videoPlaying=false;render();return}
+if(b.dataset.fix!==undefined){var id=+b.dataset.fix,i=+b.dataset.i,m=S.mistakes.filter(function(r){return r.id==id})[0];if(i==m.a)fixIt(m);else(S.wp[id]=S.wp[id]||[]).push(i)}
+if(b.dataset.pick!==undefined){if(S.fb=="ok")return;S.pick=+b.dataset.pick;S.fb=null}
+if(b.dataset.act){var a=b.dataset.act;
+if(a=="hint"&&S.subj=="english")ELOG.hints++;
+if(a=="retry"&&S.subj=="english")ELOG.retries++;
+if(a=="play-video"){S.videoPlaying=!S.videoPlaying;render();return}
+
+if(a=="replay"){ELOG.replays++;render();return}
+if(a=="captions"){ELOG.captions=ELOG.captions?0:1;render();return}
+if(a=="words"){ELOG.wordCards++;render();return}
+if(a=="hint")S.hints=Math.min(S.hints+1,q.h.length);
+if(a=="check"){S.tries++;if(S.subj=="english"){ELOG.answers++;ELOG.responseMs.push(Date.now()-studyStart);studyStart=Date.now()}var m2=S.mistakes.filter(function(r){return r.t==q.t})[0];if(S.pick===q.a){S.fb="ok";S.right++;if(S.tries==1)S.first++;if(m2&&!m2.fixed)fixIt(m2)}else{S.fb="no";if(!m2)S.mistakes.push({id:Date.now(),t:q.t,tag:q.tag,o:q.o,a:q.a,w:q.o[S.pick],e:q.e})}}
+if(a=="retry"){S.fb=null;S.pick=null}
+if(a=="next"){var pool=S.subj=="english"?EQ:Q;if(S.qi<pool.length-1)S.qi++;else S.done=true;S.pick=null;S.fb=null;S.hints=0;S.tries=0}
+if(a=="again"){studyStart=Date.now();S.qi=0;S.pick=null;S.fb=null;S.hints=0;S.tries=0;S.done=false;S.first=0;S.right=0}}
+render();var f=$(".opt[aria-pressed=true]");if(f&&b.dataset.pick!==undefined)f.focus()});
+var h=location.hash.slice(1);if(P[h]&&h!="entry")S.view=h;
+render();
+})();
+</script>
+</body>
+</html>
